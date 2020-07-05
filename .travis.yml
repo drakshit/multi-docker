@@ -1,0 +1,20 @@
+sudo: required
+services:
+    - docker
+
+    before_install:
+        - docker build -t drakshit/multi-docker -f ./client/Dockerfile.dev ./client/
+    script:
+        - docker run drakshit/multi-docker npm test -- --coverage
+    after-success:
+        - docker build -t drakshit/multi-client ./client
+        - docker build -t drakshit/multi-nginx ./nginx
+        - docker build -t drakshit/multi-server ./server
+        - docker build -t drakshit/multi-worker ./worker
+    # login to Docker
+        -echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    # push to Docker
+        - docker push riorakshit/multi-client
+        - docker push riorakshit/multi-nginx
+        - docker push riorakshit/multi-server
+        - docker push riorakshit/multi-worker           
